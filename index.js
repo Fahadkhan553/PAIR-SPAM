@@ -73,8 +73,8 @@ console.log(color + `Running... spam-pairing-wa
 ┏❐ 
 ┃ [ FOLLOW THE INSTRUCTIONS BELOW, TO SPAM ]
 ┃
-┃⭔ NUMBER BATA BAS ( 92xxxxxxx )
-┃⭔ KITNA MARO ( 1-1000 )
+┃⭔ Target Number ( 92xxxxxxx )
+┃⭔ how much spam ( 1-1000 )
 ┃
 ┃ [ THIS TOOL CAN ONLY BE USED ON NUMBER +92 ]
 ┗❐ 
