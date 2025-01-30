@@ -79,3 +79,5 @@ console.log(color + `Running... spam-pairing-wa
 ┃ [ THIS TOOL CAN ONLY BE USED ON NUMBER +92 ]
 ┗❐ 
 =========================` + xColor);
+
+KleeProject();
