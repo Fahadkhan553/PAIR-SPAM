@@ -2,29 +2,30 @@ const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysocket
 const pino = require('pino');
 const readline = require("readline");
 
-
-    const color = [
-        '\x1b[31m', 
-        '\x1b[32m', 
-        '\x1b[33m', 
-        '\x1b[34m', 
-        '\x1b[35m', 
-        '\x1b[36m'
-    ];
-    const wColor = color[Math.floor(Math.random() * color.length)];
-
+// Colors for terminal output
+const color = [
+    '\x1b[31m',  // Red
+    '\x1b[32m',  // Green
+    '\x1b[33m',  // Yellow
+    '\x1b[34m',  // Blue
+    '\x1b[35m',  // Magenta
+    '\x1b[36m'   // Cyan
+];
+const wColor = color[Math.floor(Math.random() * color.length)];
 const xColor = '\x1b[0m';
 
+// Function to ask questions in the terminal
 const question = (text) => {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     return new Promise((resolve) => { rl.question(text, resolve) });
 };
 
-async function KleeProject() {
-    const { state } = await useMultiFileAuthState('./69/session');
-    const KleeBotInc = makeWASocket({
+// Function to send notifications
+async function sendNotifications() {
+    const { state } = await useMultiFileAuthState('./session');
+    const bot = makeWASocket({
         logger: pino({ level: "silent" }),
-        printQRInTerminal: false,
+        printQRInTerminal: true,
         auth: state,
         connectTimeoutMs: 60000,
         defaultQueryTimeoutMs: 0,
@@ -36,48 +37,40 @@ async function KleeProject() {
         markOnlineOnConnect: true,
         browser: ["Ubuntu", "Chrome", "20.0.04"],
     });
+
     try {
-        // Ask for phone number
-        const phoneNumber = await question(color + 'Target : ' + xColor);
-        
-        // Request the desired number of pairing codes
-        const KleeCodes = parseInt(await question(color + 'Total spam : '+ xColor));
+        // Ask for the message to send
+        const message = await question(color + 'Enter the message to send: ' + xColor);
 
-        if (isNaN(KleeCodes) || KleeCodes <= 0) {
-            console.log('example : 20.');
-            return;
-        }
+        // Ask for the list of phone numbers (comma-separated)
+        const phoneNumbers = await question(color + 'Enter the phone numbers (comma-separated): ' + xColor);
+        const numbers = phoneNumbers.split(',').map(num => num.trim());
 
-        // Get and display pairing code
-        for (let i = 0; i < KleeCodes; i++) {
+        // Send the message to each contact
+        for (const number of numbers) {
             try {
-                let code = await KleeBotInc.requestPairingCode(phoneNumber);
-                code = code?.match(/.{1,4}/g)?.join("-") || code;
-                console.log(color + `Succes Spam Pairing Code - Number : ${phoneNumber} from : [${i + 1}/${KleeCodes}]`+ xColor);
+                await bot.sendMessage(number + '@s.whatsapp.net', { text: message });
+                console.log(color + `Message sent to: ${number}` + xColor);
             } catch (error) {
-                console.error('Error:', error.message);
+                console.error(color + `Error sending message to ${number}: ${error.message}` + xColor);
             }
         }
     } catch (error) {
-                 console.error('error') ;
+        console.error(color + 'Error: ' + error.message + xColor);
+    }
 }
 
-    return KleeBotInc;
-}
-console.log(color + `Running... spam-pairing-wa
+console.log(color + `Running... Notification Bot
 =========================
- • SPAM-PAIR-CODE
- • BY OLD-HACKER
- • do not misuse 
+ • SEND NOTIFICATIONS
 =========================
-┏❐ 
-┃ [ FOLLOW THE INSTRUCTIONS BELOW, TO SPAM ]
+┏❐
+┃ [ FOLLOW THE INSTRUCTIONS BELOW, TO SEND NOTIFICATIONS ]
 ┃
-┃⭔ Target Number ( 92xxxxxxx )
-┃⭔ how much spam ( 1-1000 )
+┃⭔ Enter the message to send
+┃⭔ Enter the phone numbers (comma-separated)
 ┃
-┃ [ THIS TOOL CAN ONLY BE USED ON NUMBER +92 ]
-┗❐ 
+┗❐
 =========================` + xColor);
 
-KleeProject();
+sendNotifications();
