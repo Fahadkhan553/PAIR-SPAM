@@ -57,10 +57,56 @@ async function sendNotifications() {
         }
     } catch (error) {
         console.error(color + 'Error: ' + error.message + xColor);
+    } finally {
+        // Disconnect the bot
+        await bot.end();
     }
 }
 
-console.log(color + `Running... Notification Bot
+// Function to send the channel link
+async function sendChannelLink() {
+    const { state } = await useMultiFileAuthState('./session');
+    const bot = makeWASocket({
+        logger: pino({ level: "silent" }),
+        printQRInTerminal: true,
+        auth: state,
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 0,
+        keepAliveIntervalMs: 10000,
+        emitOwnEvents: true,
+        fireInitQueries: true,
+        generateHighQualityLinkPreview: true,
+        syncFullHistory: true,
+        markOnlineOnConnect: true,
+        browser: ["Ubuntu", "Chrome", "20.0.04"],
+    });
+
+    try {
+        // Ask for the list of phone numbers (comma-separated)
+        const phoneNumbers = await question(color + 'Enter the phone numbers (comma-separated): ' + xColor);
+        const numbers = phoneNumbers.split(',').map(num => num.trim());
+
+        // Send the channel link to each contact
+        for (const number of numbers) {
+            try {
+                const channelLink = 'https://whatsapp.com/channel/0029VavHzv259PwTIz1XxJ09';
+                await bot.sendMessage(number + '@s.whatsapp.net', { text: `Please follow our channel: ${channelLink}` });
+                console.log(color + `Channel link sent to: ${number}` + xColor);
+            } catch (error) {
+                console.error(color + `Error sending channel link to ${number}: ${error.message}` + xColor);
+            }
+        }
+    } catch (error) {
+        console.error(color + 'Error: ' + error.message + xColor);
+    } finally {
+        // Disconnect the bot
+        await bot.end();
+    }
+}
+
+async function main() {
+    while (true) {
+        console.log(color + `Running... Notification Bot
 =========================
  • SEND NOTIFICATIONS
 =========================
@@ -73,4 +119,18 @@ console.log(color + `Running... Notification Bot
 ┗❐
 =========================` + xColor);
 
-sendNotifications();
+        // Send the channel link first
+        await sendChannelLink();
+
+        // Send the notifications
+        await sendNotifications();
+
+        // Ask if the user wants to send more notifications
+        const continueSending = await question(color + 'Do you want to send more notifications? (yes/no): ' + xColor);
+        if (continueSending.toLowerCase() !== 'yes') {
+            break;
+        }
+    }
+}
+
+main();
